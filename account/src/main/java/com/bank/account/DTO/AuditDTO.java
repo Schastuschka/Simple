@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 @Data
 @AllArgsConstructor
@@ -26,10 +26,10 @@ public class AuditDTO {
     private String modifiedBy;
 
     @NotNull(message = "Created at must not be null")
-    private LocalDateTime createdAt;
+    private ZonedDateTime createdAt;
 
     @NotNull(message = "Modified at must not be null")
-    private LocalDateTime modifiedAt;
+    private ZonedDateTime modifiedAt;
 
     private String newEntityJson;
 

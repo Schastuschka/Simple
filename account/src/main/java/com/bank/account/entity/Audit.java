@@ -1,64 +1,84 @@
 package com.bank.account.entity;
 
-import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import org.hibernate.annotations.Cascade;
+import org.hibernate.envers.*;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.*;
+import java.time.ZonedDateTime;
 
-import java.time.LocalDateTime;
+        /*
+        * Класс-сущность для записей аудирования
+        */
+@Data
+@EqualsAndHashCode(exclude = "revInfo")
+@ToString(exclude = "revInfo")
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
+@Table(name = "audit", schema = "account")
+public class Audit {
 
+    /*Идентификационный номер записи аудирования */
+    @Id
+    @RevisionNumber
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @Entity(name = "audit")
-    @Getter
-    @Setter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @EqualsAndHashCode
+    /* Тип сущности, для которой создается запись аудирования */
+    @Column(name = "entity_type")
+    @NotNull(message = "Не указан тип измененной сущности")
+    @NotBlank(message = "Не указан тип измененной сущности")
+    @Size(max = 40, message = "Название типа сущности не должно превышать 40 символов")
+    private String entityType;
 
-    @Schema(name = "Audit", description = "Сущность, объекты которой сохраняют в бд все CRUD операции с основными сущностями.")
-    public class Audit {
+    /* Тип операции над сущностью, которая инициировала запись аудирования */
+    @Column(name = "operation_type")
+    @NotNull(message = "Не указан тип операции произведенный над сущностью")
+    @NotBlank(message = "Не указан тип операции произведенный над сущностью")
+    @Size(max = 255, message = "Название типа операции не должно превышать 255 символов")
+    private String operationType;
 
-        private static final Logger LOGGER = LoggerFactory.getLogger(com.bank.account.entity.Audit.class);
+    /* Данные о том, кто совершил добавление новой сущности в бд, которое инициировало запись аудирования */
+    @Column(name = "created_by")
+    @NotNull(message = "Не указан инициатор изменения")
+    @NotBlank(message = "Не указан инициатор изменения")
+    @Size(max = 255, message = "Имя инициатора изменения не должно превышать 255 символов")
+    private String createdBy;
 
-        @Id
-        @GeneratedValue(strategy = GenerationType.IDENTITY)
-        private Long id;
+    /* Данные о том, кто совершил изменение сущности, которое инициировало запись аудирования */
+    @Column(name = "modified_by")
+    @Size(max = 255, message = "Имя инициатора изменения не должно превышать 255 символов")
+    private String modifiedBy;
 
-        @Column(name = "entity_type", length = 40)
-        @NotBlank
-        private String entityType;
+    /* Данные о том, когда совершили добавление новой сущности в бд, которое инициировало запись аудирования */
+    @Column(name = "created_at")
+    @NotNull(message = "Не указана дата создания")
+    private ZonedDateTime createdAt;
 
-        @Column(name = "operation_type", length = 255)
-        @NotBlank
-        private String operationType;
+    /* Данные о том, когда совершили изменение сущности, которое инициировало запись аудирования */
+    @Column(name = "modified_at")
+    private ZonedDateTime modifiedAt;
 
-        @Column(name = "created_by", length = 255)
-        private String createdBy;
+    /* Данные о том, как теперь выглядит добавленная/измененная сущность */
+    @Column(name = "new_entity_json")
+    private String newEntityJson;
 
-        @Column(name = "modified_by", length = 255)
-        private String modifiedBy;
+    /* Данные о том, как выглядела сущность до изменения */
+    @Column(name = "entity_json")
+    @NotNull(message = "Не указана созданная сущность")
+    @NotBlank(message = "Не указана созданная сущность")
+    private String entityJson;
 
-        @Column(name = "created_at")
-        private LocalDateTime createdAt;
-
-        @Column(name = "modified_at")
-        private LocalDateTime modifiedAt;
-
-        @Column(name = "new_entity_json", columnDefinition = "TEXT")
-        private String newEntityJson;
-
-        @Column(name = "entity_json", columnDefinition = "TEXT")
-        @NotBlank
-        private String entityJson;
-
-        @OneToOne(mappedBy = "audit")
-        private RevInfo revInfo;
-
-        public void setRevInfo(RevInfo revInfo) {
-            this.revInfo = revInfo;
-        }
+    /**
+     * Ссылка на вспомогательную таблицу аудирования
+     * @see RevInfo
+     */
+    @OneToOne(mappedBy = "audit")
+    @Cascade(org.hibernate.annotations.CascadeType.SAVE_UPDATE)
+    private RevInfo revInfo;
 
 }

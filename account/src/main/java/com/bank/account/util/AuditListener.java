@@ -38,14 +38,14 @@ public class AuditListener implements RevisionListener {
         audit.setOperationType(revisionType.toString());
         if (revisionType.toString().equals("MOD")) {
             audit.setNewEntityJson(modifyAccountDetails.toString());
-            audit.setModifiedAt(zonedDateTimeOfRevision.toLocalDateTime());
+            audit.setModifiedAt(zonedDateTimeOfRevision);
             audit.setModifiedBy(revInfo.getUsername());
             audit.setEntityJson(resultList.get(resultList.size() - 2)[0].toString());
         } else {
             audit.setEntityJson(modifyAccountDetails.toString());
         }
         audit.setCreatedBy(revInfo.getUsername());
-        audit.setCreatedAt(zonedDateTimeOfRevision.toLocalDateTime());
+        audit.setCreatedAt(zonedDateTimeOfRevision);
         audit.setRevInfo(revInfo);
         entityManager.persist(audit);
         revInfo.setAudit(audit);
